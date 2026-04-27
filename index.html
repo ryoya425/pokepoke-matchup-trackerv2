@@ -1,0 +1,100 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>対戦ログ&ポイント管理 v3</title><style>
+:root{--bg:#0b1020;--p:#141b34;--p2:#1b2445;--t:#f3f5ff;--m:#aab3d6;--b:#2b376a;--a:#7aa2ff;--g:#8df0cc;--r:#ff8f8f;--w:#ffd39b}*{box-sizing:border-box}body{margin:0;padding:20px;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;background:linear-gradient(180deg,var(--bg),#0f1530 60%,#0b1020);color:var(--t)}.wrap{max-width:1180px;margin:auto}.grid{display:grid;grid-template-columns:380px 1fr;gap:18px}.card{background:linear-gradient(180deg,var(--p),var(--p2));border:1px solid var(--b);border-radius:18px;padding:18px}h1{margin:0 0 8px}.sub,.note{color:var(--m)}.note{font-size:13px;margin-top:10px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.field{margin-bottom:12px}label{display:block;color:var(--m);font-size:13px;margin-bottom:6px}input,select,button,textarea{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--b);background:#0e1430;color:var(--t);font-size:15px}textarea{min-height:70px;resize:vertical}button{cursor:pointer;font-weight:700}.btn{background:linear-gradient(180deg,#3d67ff,#2f56e6);border:0}.goodbtn{background:linear-gradient(180deg,#24b99a,#168a73);border:0}.badbtn{background:linear-gradient(180deg,#ff6b6b,#d94b4b);border:0}.btn2{background:linear-gradient(180deg,#23315d,#1b2445)}.warnbtn{background:linear-gradient(180deg,#b98524,#7a5619);border:0}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pillgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.pill{background:#0e1430;border:1px solid var(--b);border-radius:16px;padding:12px}.k{color:var(--m);font-size:12px}.v{font-size:22px;font-weight:850}canvas{width:100%;height:300px;background:rgba(8,12,27,.5);border:1px solid var(--b);border-radius:16px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px 7px;border-bottom:1px solid var(--b);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}.scroll{overflow-x:auto}.g{color:var(--g)}.r{color:var(--r)}.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.tab{width:auto;padding:8px 12px;background:#0e1430;border:1px solid var(--b);color:var(--m)}.active{color:var(--t);border-color:var(--a)}.hidden{display:none}@media(max-width:920px){body{padding:14px}.grid{grid-template-columns:1fr}.pillgrid{grid-template-columns:1fr 1fr}.row,.row3{grid-template-columns:1fr}}
+</style></head><body><div class="wrap"><h1>対戦ログ & ポイント管理ツール v3</h1><div class="sub">主要デッキはプルダウンで選択、マイナー/派生は自由入力。勝敗ログから連勝加点ルールでポイントを自動計算します。</div><div class="grid"><div class="card"><h2>対戦を記録</h2>
+<div class="field row"><div><label>開始pt</label><input id="startPt" type="number" value="2129"></div><div><label>現在の連勝数（任意）</label><input id="startStreak" type="number" min="0" value="0"></div></div>
+<div class="field row"><div><label>自分のデッキ（候補）</label><select id="myDeckSelect"></select></div><div><label>相手のデッキ（候補）</label><select id="oppDeckSelect"></select></div></div>
+<div class="field row"><div><label>自分のデッキ（自由入力）</label><input id="myDeck" placeholder="候補にない場合は入力"></div><div><label>相手のデッキ（自由入力）</label><input id="oppDeck" placeholder="候補にない場合は入力"></div></div>
+<div class="field row"><div><label>勝敗</label><select id="result"><option value="W">勝ち</option><option value="L">負け</option></select></div><div><label>先攻/後攻</label><select id="firstSecond"><option value="">未入力</option><option>先攻</option><option>後攻</option></select></div></div>
+<div class="field"><label>タグ</label><input id="tag" placeholder="事故 / フリーズ / 上振れ"></div>
+<div class="field"><label>メモ</label><textarea id="memo" placeholder="例: 終盤リーサル逃し、初動事故など"></textarea></div>
+<div class="buttons"><button class="goodbtn" id="addWinBtn">勝ちで追加</button><button class="badbtn" id="addLoseBtn">負けで追加</button></div><button class="btn" id="addBtn" style="margin-top:10px">入力内容で追加</button><div class="note">対戦後ptは入力不要です。勝敗と連勝数から自動計算します。開始ptを変更すると全ログのポイント推移が再計算されます。</div>
+<hr style="border-color:var(--b);margin:18px 0"><h2>加点ルール</h2>
+<div class="field row"><div><label>1連勝目</label><input id="w1" type="number" value="10"></div><div><label>2連勝目</label><input id="w2" type="number" value="13"></div></div>
+<div class="field row"><div><label>3連勝目</label><input id="w3" type="number" value="16"></div><div><label>4連勝目</label><input id="w4" type="number" value="19"></div></div>
+<div class="field row"><div><label>5連勝目以降</label><input id="w5" type="number" value="22"></div><div><label>負け</label><input id="losePts" type="number" value="-10"></div></div>
+<hr style="border-color:var(--b);margin:18px 0"><h2>データ操作</h2><div class="buttons"><button class="btn2" id="exportBtn">CSV出力</button><button class="btn2" id="jsonBtn">JSON保存</button></div><div class="field" style="margin-top:10px"><label>CSV/JSON読み込み</label><input id="importFileInput" type="file" accept=".csv,.json"></div><div class="buttons"><button class="warnbtn" id="undoBtn">直前を削除</button><button class="badbtn" id="clearBtn">全削除</button></div></div>
+<div><div class="card"><div class="tabs"><button class="tab active" data-tab="summary">概要</button><button class="tab" data-tab="matchups">対面別</button><button class="tab" data-tab="log">ログ</button></div>
+<div id="summaryTab"><div class="pillgrid"><div class="pill"><div class="k">試合数</div><div class="v" id="totalGames">0</div></div><div class="pill"><div class="k">勝率</div><div class="v" id="winRate">-</div></div><div class="pill"><div class="k">現在pt</div><div class="v" id="currentPt">-</div></div><div class="pill"><div class="k">pt増減</div><div class="v" id="ptDelta">-</div></div></div><h2>ポイント推移</h2><canvas id="ptCanvas" width="900" height="300"></canvas><h2 style="margin-top:18px">勝率推移</h2><canvas id="wrCanvas" width="900" height="300"></canvas></div>
+<div id="matchupsTab" class="hidden"><h2>対面別勝率</h2><div class="scroll"><table><thead><tr><th>相手デッキ</th><th>試合</th><th>勝</th><th>負</th><th>勝率</th><th>pt増減</th></tr></thead><tbody id="matchupBody"></tbody></table></div><h2 style="margin-top:18px">自分のデッキ別</h2><div class="scroll"><table><thead><tr><th>自分デッキ</th><th>試合</th><th>勝</th><th>負</th><th>勝率</th><th>pt増減</th></tr></thead><tbody id="myDeckBody"></tbody></table></div></div>
+<div id="logTab" class="hidden"><h2>対戦ログ</h2><div class="scroll"><table><thead><tr><th>#</th><th>日時</th><th>自分</th><th>相手</th><th>勝敗</th><th>連勝</th><th>pt変動</th><th>対戦後pt</th><th>先後</th><th>タグ</th></tr></thead><tbody id="logBody"></tbody></table></div></div>
+</div></div></div></div>
+<script>
+
+const DECK_CANDIDATES = [
+  "ピカチュウex","ミュウツーex","リザードンex","スターミーex","フリーザーex",
+  "カイリュー","マタドガス","マタドガス/アーボック","カツラ","フシギバナex",
+  "カイリキーex","ガラガラex","ゲンガーex","プクリンex","ナッシーex",
+  "カメックスex","ファイヤーex","プテラex","ギャラドスex","水3鳥",
+  "チルタリス","その他"
+];
+
+function fillDeckSelect(selectId, inputId) {
+  const sel = document.getElementById(selectId);
+  const input = document.getElementById(inputId);
+  const current = input.value.trim();
+  const isMy = selectId.includes("My");
+  const logDecks = [...new Set(logs.map(l => isMy ? l.myDeck : l.oppDeck).filter(Boolean))];
+  const merged = [...new Set([...DECK_CANDIDATES, ...logDecks])];
+
+  sel.innerHTML = '<option value="">候補から選択</option>' +
+    merged.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join("");
+
+  if (current && merged.includes(current)) sel.value = current;
+  else if (current) sel.value = "その他";
+}
+
+function setupDeckSelectHandlers() {
+  [["myDeckSelect","myDeck"], ["oppDeckSelect","oppDeck"]].forEach(([sid,iid]) => {
+    const sel = document.getElementById(sid);
+    const input = document.getElementById(iid);
+
+    sel.onchange = () => {
+      if (sel.value && sel.value !== "その他") {
+        input.value = sel.value;
+      } else if (sel.value === "その他") {
+        input.value = "";
+        input.focus();
+      }
+    };
+
+    input.oninput = () => {
+      const v = input.value.trim();
+      if (!v) {
+        sel.value = "";
+      } else {
+        const exists = [...sel.options].some(o => o.value === v);
+        sel.value = exists ? v : "その他";
+      }
+    };
+  });
+}
+
+const KEY="rank_match_logger_v3";let logs=[];let settings={startPt:2129,startStreak:0,w1:10,w2:13,w3:16,w4:19,w5:22,losePts:-10};
+function save(){localStorage.setItem(KEY,JSON.stringify({logs,settings}))}
+function load(){try{const data=JSON.parse(localStorage.getItem(KEY)||"{}");logs=Array.isArray(data.logs)?data.logs:[];settings={...settings,...(data.settings||{})}}catch{logs=[]}}
+function syncSettingsFromInputs(){["startPt","startStreak","w1","w2","w3","w4","w5","losePts"].forEach(id=>{settings[id]=Number(document.getElementById(id).value)||0});save()}
+function syncInputsFromSettings(){["startPt","startStreak","w1","w2","w3","w4","w5","losePts"].forEach(id=>document.getElementById(id).value=settings[id])}
+function now(){const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function signed(n){return n==null||Number.isNaN(n)?"-":n>=0?`+${n}`:`${n}`}
+function winPts(streak){if(streak<=1)return settings.w1;if(streak===2)return settings.w2;if(streak===3)return settings.w3;if(streak===4)return settings.w4;return settings.w5}
+function calcLogs(){let pt=settings.startPt,streak=settings.startStreak||0;return logs.map(l=>{let delta,after,shownStreak;if(l.result==="W"){streak+=1;shownStreak=streak;delta=winPts(streak);pt+=delta}else{shownStreak=0;delta=settings.losePts;pt+=delta;streak=0}after=pt;return{...l,calcDelta:delta,calcAfterPt:after,calcStreak:shownStreak}})}
+function addLog(force){syncSettingsFromInputs();const myDeck=document.getElementById("myDeck").value.trim()||"未入力",oppDeck=document.getElementById("oppDeck").value.trim()||"未入力",result=force||document.getElementById("result").value,firstSecond=document.getElementById("firstSecond").value,tag=document.getElementById("tag").value.trim(),memo=document.getElementById("memo").value.trim();logs.push({id:String(Date.now())+Math.random(),time:now(),myDeck,oppDeck,result,firstSecond,tag,memo});document.getElementById("memo").value="";save();render()}
+function wr(w,t){return t?(w/t*100).toFixed(1)+"%":"-"}
+function renderSummary(){const c=calcLogs(),t=c.length,w=c.filter(l=>l.result==="W").length,cur=c.length?c[c.length-1].calcAfterPt:settings.startPt,delta=cur-settings.startPt;totalGames.textContent=t;winRate.textContent=wr(w,t);currentPt.textContent=cur;ptDelta.textContent=signed(delta)}
+function dsum(items){return items.reduce((s,l)=>s+(typeof l.calcDelta==="number"?l.calcDelta:0),0)}
+function group(key){const c=calcLogs(),m=new Map();for(const l of c){const k=l[key]||"未入力";if(!m.has(k))m.set(k,[]);m.get(k).push(l)}return [...m.entries()].map(([name,items])=>{const w=items.filter(x=>x.result==="W").length,t=items.length;return{name,total:t,w,l:t-w,rate:t?w/t:0,delta:dsum(items)}}).sort((a,b)=>b.total-a.total||b.rate-a.rate)}
+function renderGroups(){matchupBody.innerHTML=group("oppDeck").map(r=>`<tr><td>${esc(r.name)}</td><td>${r.total}</td><td class="g">${r.w}</td><td class="r">${r.l}</td><td>${(r.rate*100).toFixed(1)}%</td><td class="${r.delta>=0?'g':'r'}">${signed(r.delta)}</td></tr>`).join("");myDeckBody.innerHTML=group("myDeck").map(r=>`<tr><td>${esc(r.name)}</td><td>${r.total}</td><td class="g">${r.w}</td><td class="r">${r.l}</td><td>${(r.rate*100).toFixed(1)}%</td><td class="${r.delta>=0?'g':'r'}">${signed(r.delta)}</td></tr>`).join("")}
+function renderLog(){const c=calcLogs();logBody.innerHTML=c.map((l,i)=>`<tr><td>${i+1}</td><td>${esc(l.time)}</td><td>${esc(l.myDeck)}</td><td>${esc(l.oppDeck)}</td><td class="${l.result==="W"?'g':'r'}">${l.result==="W"?"勝":"負"}</td><td>${l.calcStreak}</td><td class="${l.calcDelta>=0?'g':'r'}">${signed(l.calcDelta)}</td><td>${l.calcAfterPt}</td><td>${esc(l.firstSecond||"")}</td><td>${esc(l.tag||"")}</td></tr>`).join("")}
+function renderLists(){fillDeckSelect("myDeckSelect","myDeck");fillDeckSelect("oppDeckSelect","oppDeck")}
+function lineChart(canvas,vals,opt={}){const c=canvas.getContext("2d"),W=canvas.width,H=canvas.height;c.clearRect(0,0,W,H);c.fillStyle="#0b1020";c.fillRect(0,0,W,H);const L=56,R=18,T=20,B=36,w=W-L-R,h=H-T-B;c.strokeStyle="#2b376a";for(let i=0;i<=4;i++){const y=T+h*i/4;c.beginPath();c.moveTo(L,y);c.lineTo(L+w,y);c.stroke()}if(!vals.length){c.fillStyle="#aab3d6";c.font="16px system-ui";c.fillText("データがありません",L+20,T+40);return}let min=Math.min(...vals),max=Math.max(...vals);if(opt.min!=null)min=Math.min(min,opt.min);if(opt.max!=null)max=Math.max(max,opt.max);if(min===max){min-=10;max+=10}const mg=(max-min)*.08;min-=mg;max+=mg;const x=i=>vals.length===1?L:L+w*i/(vals.length-1),y=v=>T+h*(1-(v-min)/(max-min));c.fillStyle="#aab3d6";c.font="12px system-ui";for(let i=0;i<=4;i++){const val=max-(max-min)*i/4;c.fillText(String(Math.round(val)),8,T+h*i/4+4)}c.strokeStyle=opt.color||"#7aa2ff";c.lineWidth=3;c.beginPath();vals.forEach((v,i)=>i?c.lineTo(x(i),y(v)):c.moveTo(x(i),y(v)));c.stroke();c.fillStyle=opt.color||"#7aa2ff";vals.forEach((v,i)=>{if(i%Math.ceil(vals.length/60||1)!==0&&i!==vals.length-1)return;c.beginPath();c.arc(x(i),y(v),3,0,Math.PI*2);c.fill()})}
+function renderCharts(){const c=calcLogs();lineChart(ptCanvas,c.map(l=>l.calcAfterPt),{color:"#7aa2ff"});let w=0,arr=[];c.forEach((l,i)=>{if(l.result==="W")w++;arr.push(w/(i+1)*100)});lineChart(wrCanvas,arr,{color:"#8df0cc",min:0,max:100})}
+function render(){syncSettingsFromInputs();renderLists();renderSummary();renderGroups();renderLog();renderCharts()}
+function csvCell(v){const s=String(v??"");return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+function download(name,text,type){const blob=new Blob([text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function exportCSV(){const c=calcLogs(),hs=["time","myDeck","oppDeck","result","firstSecond","tag","memo","calcStreak","calcDelta","calcAfterPt"],lines=[hs.join(",")];c.forEach(l=>lines.push(hs.map(h=>csvCell(l[h])).join(",")));download("match_logs.csv",lines.join("\n"),"text/csv")}
+function exportJSON(){download("match_logs.json",JSON.stringify({logs,settings},null,2),"application/json")}
+function importJSONorCSV(f){const r=new FileReader();r.onload=()=>{try{if(f.name.endsWith(".json")){const d=JSON.parse(r.result);if(Array.isArray(d)){logs=d}else{logs=Array.isArray(d.logs)?d.logs:[];settings={...settings,...(d.settings||{})};syncInputsFromSettings()}}else{const rows=parseCSV(r.result),hs=rows[0];logs=rows.slice(1).map(row=>{const o={};hs.forEach((h,i)=>o[h]=row[i]??"");return{id:String(Date.now())+Math.random(),time:o.time||now(),myDeck:o.myDeck||"未入力",oppDeck:o.oppDeck||"未入力",result:o.result==="L"?"L":"W",firstSecond:o.firstSecond||"",tag:o.tag||"",memo:o.memo||""}})}save();render();alert("読み込みました")}catch(e){alert("読み込み失敗: "+e.message)}};r.readAsText(f)}
+function parseCSV(text){const rows=[];let row=[],cell="",q=false;for(let i=0;i<text.length;i++){const ch=text[i],nx=text[i+1];if(q){if(ch=='"'&&nx=='"'){cell+='"';i++}else if(ch=='"')q=false;else cell+=ch}else{if(ch=='"')q=true;else if(ch==","){row.push(cell);cell=""}else if(ch=="\n"){row.push(cell);rows.push(row);row=[];cell=""}else if(ch!="\r")cell+=ch}}row.push(cell);rows.push(row);return rows.filter(r=>r.some(x=>x!==""))}
+addBtn.onclick=()=>addLog();addWinBtn.onclick=()=>{result.value="W";addLog("W")};addLoseBtn.onclick=()=>{result.value="L";addLog("L")};undoBtn.onclick=()=>{if(logs.length&&confirm("直前の1件を削除しますか？")){logs.pop();save();render()}};clearBtn.onclick=()=>{if(confirm("全ログを削除しますか？")){logs=[];save();render()}};exportBtn.onclick=exportCSV;jsonBtn.onclick=exportJSON;importFileInput.onchange=e=>{const f=e.target.files[0];if(f)importJSONorCSV(f);e.target.value=""};["startPt","startStreak","w1","w2","w3","w4","w5","losePts"].forEach(id=>document.getElementById(id).oninput=render);document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");const t=b.dataset.tab;summaryTab.classList.toggle("hidden",t!=="summary");matchupsTab.classList.toggle("hidden",t!=="matchups");logTab.classList.toggle("hidden",t!=="log");renderCharts()});load();syncInputsFromSettings();setupDeckSelectHandlers();render();
+</script></body></html>
